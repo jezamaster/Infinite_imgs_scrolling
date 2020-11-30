@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="cz">
+<head>
+  <meta charset="UTF-8">
+  <title>test</title>
+
+</head>
+<style>
+html {
+    box-sizing: border-box;
+  }  
+body {
+background-color: yellow;
+min-height: 100vh;
+}
+.img-wrapper {
+    width: auto;
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: green;
+  }
+  
+</style>
+  
+<body>
+ <div class="img-wrapper">
+   
+  </div>
+
+</body>
+<script>
+// MUSIM TO DOLADIT, NENAHRAVA SE TO TAK JAK BY MELO (TZN. PO NAHRANI 10 FOTEK PRI SCROLLINGU)
+  
+let photos_arr = [];
+let ready_to_load_other_imgs = true;
+let number_of_loaded_imgs = 0;
+let total_required_loaded_imgs = 10;
+  
+function imgLoadComplete() {
+  number_of_loaded_imgs++;
+  if(number_of_loaded_imgs === total_required_loaded_imgs) {
+    ready_to_load_other_imgs = true;
+  }
+}
+  
+function displayImgs() { 
+  ready_to_load_other_imgs = false;
+  number_of_loaded_imgs = 0;
+  photos_arr.forEach((item)=>{
+    // function to control if all the images were loaded on the page, and if so, only then upload other imgs from the server (otherwise if we scroll faster then imgs load on page, offsetHeigh would not be complete and we
+    // would upload other imgs on each scroll
+    let img_div = `<img src="${item.urls.regular}" onload="imgLoadComplete()">`;
+    document.querySelector('.img-wrapper').insertAdjacentHTML('beforeend', img_div);
+  });
+  
+}
+  
+async function uploadImgs() {
+  const url = "https://api.unsplash.com/photos/random/?client_id=j22m9KWEFW3ubbdHa24msHqV9J3YS1FnjyhGokIYDBM&count=10";
+  try {
+   let ten_imgs = await fetch(url);
+   photos_arr = await ten_imgs.json();
+   displayImgs(); 
+  }
+  catch(err) {
+    console.log('error nastal', err);
+  }
+}
+let inner_height = window.innerHeight;
+window.addEventListener('scroll', ()=> {
+  let y_position = window.scrollY;
+  if(inner_height + y_position >= document.body.offsetHeight - 1000 && ready_to_load_other_imgs === true) {
+    uploadImgs();
+  }
+});
+  
+  
+uploadImgs();
+
+
+</script>
+
+
+
+
+</html>
